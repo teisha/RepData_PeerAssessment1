@@ -20,7 +20,8 @@ The file data gives the intervals as the minute within the hour, which goes to 6
 In order to get a continuous interval, the hundreds were converted back to their 60 minute increment and added back.  
 The new field is called **minutes**.
 
-```{r, echo = TRUE}
+
+```r
 activity <- read.csv("activity.csv")
 #add minutes field
 activity <- cbind(activity,
@@ -35,22 +36,25 @@ colnames(activity)[4] <- "minutes"
 
 The first question is to find the total number of steps per day, and make a histogram showing the distribution of the daily step totals
 
-```{r, echo=TRUE}
+
+```r
 daily.totals <- with(activity,
      tapply(steps,date,sum, na.rm=TRUE))
 hist(daily.totals, col="blue")
-  
 ```
+
+![plot of chunk unnamed-chunk-2](figure/unnamed-chunk-2.png) 
 
 Then report on the mean and the median of the daily totals.  
 
-```{r}
+
+```r
 daily.mean = mean (daily.totals)
 daily.median = median(daily.totals)
 ```
 
-The mean daily step total is: `r  daily.mean` (daily.mean).  
-The median daily step total is: `r daily.median` (daily.median).    
+The mean daily step total is: 9354.2295 (daily.mean).  
+The median daily step total is: 10395 (daily.median).    
 
 
 ### What is the average daily activity pattern?
@@ -58,7 +62,8 @@ The median daily step total is: `r daily.median` (daily.median).
 This is a time series plot showing the average number of steps for each of the 5-minute intervals.  
 
 
-```{r}
+
+```r
 #Find the mean steps per minute
 avg.interval.steps <- with(activity,
                             tapply(steps,minutes,mean,na.rm=TRUE))
@@ -74,22 +79,23 @@ plot(names(avg.interval.steps),
      col="green")
 ```
 
+![plot of chunk unnamed-chunk-4](figure/unnamed-chunk-4.png) 
+
 The next task was to find the interval that had the largest number of average steps
 
-```{r}
-med.interval <- names(avg.interval.steps[avg.interval.steps == max(avg.interval.steps)])
 
+```r
+med.interval <- names(avg.interval.steps[avg.interval.steps == max(avg.interval.steps)])
 ```
-The interval with the largest average steps is `r med.interval` (med.interval) which translates to `r paste(as.numeric(med.interval) %/% 60,
-                    as.numeric(med.interval) %% 60,
-                    sep=":")`
+The interval with the largest average steps is 515 (med.interval) which translates to 8:35
 
 
 ### Finding missing values
 
 There are some intervals that have no step counts reported.  
 For any intervals that have missing values in the step count, substitute the average value for that interval.  
-```{r}
+
+```r
 #create a data frame with the intervals and average step counts
 averages <- cbind(avg.interval.steps,
                   as.numeric(names(avg.interval.steps)))
@@ -106,7 +112,13 @@ missing <- is.na(imputed$steps)
 print (paste("There are",
              sum(missing),
              "missing values in the dataset"))
+```
 
+```
+## [1] "There are 2304 missing values in the dataset"
+```
+
+```r
 #replace the missing values with the value in the average column
 imputed[missing,"steps"] <- imputed[missing,"avg.interval.steps"]
 
@@ -115,16 +127,31 @@ daily.imputed.totals <- with(imputed,
                           tapply(steps,date,sum, na.rm=TRUE))
 #plot the histogram
 hist(daily.imputed.totals, col="blue")
+```
 
+![plot of chunk unnamed-chunk-6](figure/unnamed-chunk-6.png) 
+
+```r
 imputed.median = median(daily.imputed.totals) 
 print(imputed.median)
+```
+
+```
+## [1] 10766
+```
+
+```r
 imputed.mean = mean (daily.imputed.totals)    
 print(imputed.mean)
 ```
 
+```
+## [1] 10766
+```
+
 Imputing the absent values from the averages has raised the median and the mean daily totals.  
-The median was `r daily.median`; it's now `r format(imputed.median, scientific=FALSE)`.  
-The mean was `r daily.mean`; it's now `r format(imputed.mean, scientific=FALSE)`.  
+The median was 10395; it's now 10766.  
+The mean was 9354.2295; it's now 10766.  
 The imputed mean is now equivalent to the imputed median.  
 
 Adding the missing data by using the average for the 5 minute interval increases both the mean and the median and skews the distribution towards that median value.  
@@ -136,7 +163,8 @@ In order to compare the activity of a weekday with the activity on weekend, a ne
 With the new classifier, the average is calculated again for each 5 minute interval for weekdays/weekends.  
 The results are shown in a time series plot.
 
-```{r}
+
+```r
 #create a function for determining weekend/weekday
 assign_weekday <- function ( day ) {
   if (day == "Saturday" |
@@ -175,8 +203,9 @@ g <- ggplot(avg.steps, aes(x=minutes, y=steps)) +
   labs(y = "Number of Steps")  +
   labs(title = "Average Steps Taken")
 print(g)
-
 ```
+
+![plot of chunk unnamed-chunk-7](figure/unnamed-chunk-7.png) 
 
 
 
